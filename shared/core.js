@@ -1,7 +1,5 @@
 (function() {
   const ACTIVE_BRANCH_KEY = 'rhf_branch';
-  const APP_VERSION = '1.0';
-  const APP_REVIEW_LABEL = 'Last reviewed June 2026';
   const MAP_PATH_PREFIX = window.ACTIVE_BRANCH
     ? '../shared/maps/'
     : 'shared/maps/';
@@ -219,12 +217,6 @@
   function getBranchUrl(branchId) {
     const branch = window.BRANCHES && window.BRANCHES[branchId];
     return branch ? branch.url : branchId;
-  }
-
-  function renderFooterVersion() {
-    const footer = document.querySelector('.site-footer');
-    if (!footer) return;
-    footer.innerHTML = `<span>R. H. Foster Energy</span> - Internal CSR Reference - RH Foster CSR Reference v${APP_VERSION} - ${APP_REVIEW_LABEL} - Not for customer distribution`;
   }
 
   function escapeHtml(value) {
@@ -983,7 +975,6 @@
   printAllBtn.addEventListener('click', () => runPrint('all'));
 
   // ── Init ─────────────────────────────────────────────────────────────
-  renderFooterVersion();
   initBranchContextStrip();
   initBranchSelector();
   initDeptTabs();
