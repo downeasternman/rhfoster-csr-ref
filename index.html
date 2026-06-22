@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>R. H. Foster Energy - CSR Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shared/core.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img
+        src="https://www.rhfoster.com/wp-content/themes/rhfoster/images/logo.png"
+        alt="R. H. Foster Energy"
+        onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='block';"
+      >
+      <div class="logo-fallback">R. H. Foster<br>Energy</div>
+    </div>
+    <div class="header-titles">
+      <h1>RH Foster CSR Reference</h1>
+      <p>CSR Triage Reference &mdash; Internal Use Only</p>
+    </div>
+  </div>
+</header>
+
+<main class="main branch-picker-main">
+  <section class="branch-picker-card" aria-labelledby="branchPickerHeading">
+    <h2 id="branchPickerHeading">Select your branch to get started</h2>
+    <div class="branch-picker-list" id="branchPickerList"></div>
+  </section>
+</main>
+<footer class="site-footer">
+  <span>R. H. Foster Energy</span> &mdash; Internal CSR Reference &mdash; General Service FAQ v0.18 &mdash; Last reviewed June 2026 &mdash; Not for customer distribution
+</footer>
+<script src="shared/branches.js"></script>
+<script>
+(function() {
+  const branchOrder = ['penobscot', 'lincoln', 'dennysville', 'machias', 'ellsworth', 'hampden', 'beals'];
+  const listEl = document.getElementById('branchPickerList');
+  if (!listEl || !window.BRANCHES) return;
+
+  branchOrder.forEach(branchId => {
+    const branch = window.BRANCHES[branchId];
+    if (!branch) return;
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'branch-picker-btn';
+    button.innerHTML = '<span class="branch-picker-name"></span><span class="branch-picker-phone"></span>';
+    button.querySelector('.branch-picker-name').textContent = branch.name;
+    button.querySelector('.branch-picker-phone').textContent = branch.phone;
+    button.addEventListener('click', () => {
+      window.location.href = branch.url + '/';
+    });
+    listEl.appendChild(button);
+  });
+})();
+</script>
+</body>
+</html>

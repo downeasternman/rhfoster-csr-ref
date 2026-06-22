@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Machias - RH Foster CSR Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/core.css">
+</head>
+<body>
+
+
+
+<!-- ─── HEADER ──────────────────────────────────────────────────────────── -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-wrap">
+      <img
+        src="https://www.rhfoster.com/wp-content/themes/rhfoster/images/logo.png"
+        alt="R. H. Foster Energy"
+        onerror="this.style.display='none'; document.querySelector('.logo-fallback').style.display='block';"
+      >
+      <div class="logo-fallback">R. H. Foster<br>Energy</div>
+    </div>
+    <div class="header-titles">
+      <h1>Machias - CSR Reference</h1>
+      <p>CSR Triage Reference &mdash; Internal Use Only</p>
+    </div>
+  </div>
+</header>
+
+<!-- ─── MAIN ────────────────────────────────────────────────────────────── -->
+<main class="main">
+
+  <!-- Search -->
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+    </svg>
+    <input type="search" id="search" placeholder="Search by symptom, keyword, or category&hellip;" autocomplete="off" spellcheck="false">
+    <button class="search-clear" id="searchClear" aria-label="Clear search">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- Trade filters -->
+  <div class="trade-filters-wrap">
+    <div class="trade-filters-label">Trade</div>
+    <div class="trade-switches" id="tradeSwitches"></div>
+  </div>
+
+  <!-- Category pills -->
+  <div class="category-pills-wrap">
+    <div class="category-pills-label">Category</div>
+    <div class="pills" id="pills"></div>
+  </div>
+
+  <!-- Results + print -->
+  <div class="print-summary" id="printSummary" aria-hidden="true"></div>
+  <div class="results-bar">
+    <div class="results-meta" id="resultsMeta"></div>
+    <div class="print-actions">
+      <button type="button" class="print-btn" id="printSelectedBtn" title="Print the open topic">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print selected
+      </button>
+      <button type="button" class="print-btn" id="printAllBtn" title="Print every topic in the FAQ">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+        </svg>
+        Print all
+      </button>
+    </div>
+  </div>
+
+  <!-- FAQ list -->
+  <div class="faq-list" id="faqList"></div>
+
+  <!-- Empty state -->
+  <div class="empty-state" id="emptyState">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <h3>No results found</h3>
+    <p>Try a different keyword or clear the search to browse all topics.</p>
+  </div>
+
+</main>
+
+<!-- ─── FOOTER ───────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <span>R. H. Foster Energy</span> &mdash; Internal CSR Reference &mdash; General Service FAQ v0.18 &mdash; Last reviewed June 2026 &mdash; Not for customer distribution
+</footer>
+  <script>window.ACTIVE_BRANCH = 'machias';</script>
+  <script src="../shared/branches.js"></script>
+  <script src="../shared/data-service.js"></script>
+  <script src="../shared/data-delivery.js"></script>
+  <script src="../shared/data-general.js"></script>
+  <script src="overrides.js"></script>
+  <script src="../shared/core.js"></script>
+</body>
+</html>
