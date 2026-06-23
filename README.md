@@ -37,8 +37,7 @@ rhfoster-csr-ref/
 │   ├── index.html
 │   └── overrides.js
 ├── CHANGELOG.md
-├── README.md
-└── .cursorrules
+└── README.md
 ```
 
 ## Editing FAQ Content
