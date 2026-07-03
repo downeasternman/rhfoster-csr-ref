@@ -24,10 +24,10 @@ window.BRANCH_LOCAL_CARDS  = [
       "Confirm Payment Method"
     ],
     scheduleTable: [
-      { zone: "Zone 1", towns: "Whiting, Trescott Twp, Lubec", offroadDays: [], heatingDays: [], propaneDays: [] },
-      { zone: "Zone 2", towns: "Edmunds Twp, Dennysville, Pembroke, Marion Twp", offroadDays: [], heatingDays: [], propaneDays: [] },
-      { zone: "Zone 3", towns: "Perry, Pleasant Point, Eastport", offroadDays: [], heatingDays: [], propaneDays: [] },
-      { zone: "Zone 4", towns: "Robbinston, Calais, Baring Plt, Meddybemps, Cooper, Alexander, Princeton, Baileyville, Cathance Twp, Charlotte", offroadDays: [], heatingDays: [], propaneDays: [] }
+      { zone: "Zone 1", zoneColor: "#1f77b4", towns: "Whiting, Trescott Twp, Lubec", offroadDays: [], heatingDays: [], propaneDays: [] },
+      { zone: "Zone 2", zoneColor: "#2ca02c", towns: "Edmunds Twp, Dennysville, Pembroke, Marion Twp", offroadDays: [], heatingDays: [], propaneDays: [] },
+      { zone: "Zone 3", zoneColor: "#ff7f0e", towns: "Perry, Pleasant Point, Eastport", offroadDays: [], heatingDays: [], propaneDays: [] },
+      { zone: "Zone 4", zoneColor: "#d62728", towns: "Robbinston, Calais, Baring Plt, Meddybemps, Cooper, Alexander, Princeton, Baileyville, Cathance Twp, Charlotte", offroadDays: [], heatingDays: [], propaneDays: [] }
     ],
     workflowSteps: [
       {

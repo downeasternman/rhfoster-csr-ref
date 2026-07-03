@@ -997,7 +997,23 @@
   color: var(--ink);
   vertical-align: middle;
 }
+.area-card-zone {
+  font-weight: 700;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  background-color: var(--zone-bg, transparent);
+  box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.15);
+}
+.area-card-zone:not([style*="--zone-bg"]) {
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: none;
+}
 .area-card-table tr:nth-child(even) td { background: var(--bg); }
+.area-card-table tr:nth-child(even) .area-card-zone {
+  background-color: var(--zone-bg, var(--bg));
+}
 .area-card-check {
   color: var(--red);
   font-weight: 700;

@@ -291,9 +291,16 @@
       ? escapeHtml(daysArr.join(', '))
       : 'TBD';
 
+    const zoneCell = row => {
+      const zoneStyle = row.zoneColor
+        ? ` style="--zone-bg: ${escapeHtml(row.zoneColor)}"`
+        : '';
+      return `<td class="area-card-zone"${zoneStyle}>${escapeHtml(row.zone || '')}</td>`;
+    };
+
     const rows = (card.scheduleTable || []).map(row => `
         <tr>
-          <td>${escapeHtml(row.zone || '')}</td>
+          ${zoneCell(row)}
           <td>${escapeHtml(row.towns || '')}</td>
           <td>${fuelCell(row.offroadDays)}</td>
           <td>${fuelCell(row.heatingDays)}</td>
