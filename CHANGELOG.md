@@ -7,6 +7,7 @@
 - [dennysville] add - propane tank gauge card with gallon estimate table
 - [dennysville] edit - oil gauge card with 275-gallon reference table and cardMode on local cards
 - [all] edit - bump release version to v1.0.5
+- [all] fix - add .nojekyll and trigger GitHub Pages redeploy
 - [dennysville] add - eight General and Delivery local cards for branch operations
 - [all] edit - bump release version to v1.0.4
 - [shared] fix - area card zone colors using stable CSS classes
