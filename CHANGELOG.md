@@ -2,6 +2,8 @@
 
 ## 2026-07-03
 
+- [dennysville] add - eight General and Delivery local cards for branch operations
+- [all] edit - bump release version to v1.0.4
 - [shared] fix - area card zone colors using stable CSS classes
 - [shared] fix - mobile map and schedule table scroll wrappers
 - [shared] fix - recalculate accordion height after map loads
