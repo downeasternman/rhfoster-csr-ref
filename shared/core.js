@@ -286,6 +286,119 @@
     `;
   }
 
+  function getCardLayout(item) {
+    if (item.cardMode === 'information' || item.cardMode === 'confirm' || item.cardMode === 'triage') {
+      return item.cardMode;
+    }
+    const qCount = (item.questions || []).length;
+    if (qCount === 0) return 'information';
+    if (qCount <= 3) return 'confirm';
+    return 'triage';
+  }
+
+  function renderGaugeTables(item) {
+    const tables = item.gaugeTables;
+    if (!tables || !tables.length) return '';
+
+    return `<div class="faq-gauge-tables">${tables.map(table => {
+      const percents = table.percents || [10, 25, 33, 50, 75, 100];
+      const tanks = table.tanks || [];
+      const headerCells = tanks.map(t =>
+        `<th>${escapeHtml(t.label)}</th>`
+      ).join('');
+      const rows = percents.map(pct => {
+        const cells = tanks.map(t => {
+          const gal = Math.round((t.capacityGal || 0) * pct / 100);
+          return `<td>${gal}</td>`;
+        }).join('');
+        return `<tr><td class="gauge-pct">${pct}%</td>${cells}</tr>`;
+      }).join('');
+
+      const captionHtml = table.caption
+        ? `<div class="gauge-table-caption">${escapeHtml(table.caption)}</div>`
+        : '';
+      const noteHtml = table.note
+        ? `<p class="gauge-table-note">${escapeHtml(table.note)}</p>`
+        : '';
+
+      return `
+        <div class="gauge-table-block">
+          ${captionHtml}
+          ${noteHtml}
+          <div class="gauge-table-wrap">
+            <table class="gauge-ref-table">
+              <thead>
+                <tr><th>Gauge</th>${headerCells}</tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }).join('')}</div>`;
+  }
+
+  function renderStandardCardBody(item) {
+    const layout = getCardLayout(item);
+    const questions = item.questions || [];
+
+    let urgencyHtml = '';
+    if (item.urgency) {
+      const badgeClass = item.urgency === 'redirect'
+        ? 'redirect-badge'
+        : `urgency-flag ${item.urgency === 'emergency' ? 'emergency' : ''}`;
+      urgencyHtml = `<div class="${badgeClass}">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        ${escapeHtml(item.urgencyLabel)}
+      </div>`;
+    }
+
+    let stopHtml = '';
+    if (item.stopCondition) {
+      stopHtml = `<div class="stop-banner" role="alert">
+        <div class="stop-banner-title">STOP - ${escapeHtml(item.stopCondition)}</div>
+        ${item.stopUntil ? `<div class="stop-banner-until">${escapeHtml(item.stopUntil)}</div>` : ''}
+      </div>`;
+    }
+
+    const questionsHtml = questions.map((q, i) =>
+      `<li><span class="q-num">${i + 1}</span><span>${escapeHtml(q)}</span></li>`
+    ).join('');
+
+    const questionsLabel = layout === 'confirm' ? 'Confirm with Customer' : 'Questions to Ask';
+    const tellLabel = layout === 'information' ? 'Information to Provide' : 'What to Tell the Customer';
+    const scriptLead = layout === 'triage'
+      ? '<strong class="faq-script-lead">While you wait for a callback:</strong>'
+      : '';
+    const scriptClass = layout === 'information' ? 'faq-script faq-script--information' : 'faq-script';
+
+    const questionsBlock = layout === 'information' ? '' : `
+          <div class="faq-questions">
+            ${urgencyHtml}
+            <div class="faq-section-label">${questionsLabel}</div>
+            <ol>${questionsHtml}</ol>
+          </div>`;
+
+    const urgencyAboveTell = layout === 'information' && urgencyHtml
+      ? `<div class="faq-urgency-wrap">${urgencyHtml}</div>`
+      : '';
+
+    return `
+          ${stopHtml}
+          ${questionsBlock}
+          ${urgencyAboveTell}
+          <div class="faq-tell">
+            <div class="faq-section-label">${tellLabel}</div>
+            <div class="${scriptClass}">
+              ${scriptLead}
+              ${escapeHtml(item.script)}
+            </div>
+          </div>
+          ${renderGaugeTables(item)}
+          ${renderBranchPanel(item)}
+        `;
+  }
+
   function renderAreaCardBody(card) {
     const fuelCell = daysArr => (Array.isArray(daysArr) && daysArr.length)
       ? escapeHtml(daysArr.join(', '))
@@ -642,46 +755,12 @@
     if (item.cardType) el.dataset.cardType = item.cardType;
     if (item.branchId) el.dataset.branchId = item.branchId;
 
-    let urgencyHtml = '';
-    if (item.urgency) {
-      const badgeClass = item.urgency === 'redirect'
-        ? 'redirect-badge'
-        : `urgency-flag ${item.urgency === 'emergency' ? 'emergency' : ''}`;
-      urgencyHtml = `<div class="${badgeClass}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-        ${escapeHtml(item.urgencyLabel)}
-      </div>`;
-    }
+    const cardLayout = item.cardType === 'area' ? null : getCardLayout(item);
+    if (cardLayout) el.dataset.cardLayout = cardLayout;
 
-    let stopHtml = '';
-    if (item.stopCondition) {
-      stopHtml = `<div class="stop-banner" role="alert">
-        <div class="stop-banner-title">STOP - ${escapeHtml(item.stopCondition)}</div>
-        ${item.stopUntil ? `<div class="stop-banner-until">${escapeHtml(item.stopUntil)}</div>` : ''}
-      </div>`;
-    }
-
-    const questionsHtml = item.questions.map((q, i) =>
-      `<li><span class="q-num">${i + 1}</span><span>${escapeHtml(q)}</span></li>`
-    ).join('');
     const bodyHtml = item.cardType === 'area'
       ? renderAreaCardBody(item)
-      : `
-          ${stopHtml}
-          <div class="faq-questions">
-            ${urgencyHtml}
-            <div class="faq-section-label">Questions to Ask</div>
-            <ol>${questionsHtml}</ol>
-          </div>
-          <div class="faq-tell">
-            <div class="faq-section-label">What to Tell the Customer</div>
-            <div class="faq-script">
-              <strong class="faq-script-lead">While you wait for a callback:</strong>
-              ${escapeHtml(item.script)}
-            </div>
-          </div>
-          ${renderBranchPanel(item)}
-        `;
+      : renderStandardCardBody(item);
 
     el.innerHTML = `
       <button class="faq-trigger" aria-expanded="false">
@@ -693,7 +772,7 @@
         <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
       <div class="faq-body">
-        <div class="faq-body-inner">
+        <div class="faq-body-inner${cardLayout ? ` faq-body-inner--${cardLayout}` : ''}">
           ${bodyHtml}
         </div>
       </div>

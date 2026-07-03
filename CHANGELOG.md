@@ -2,6 +2,11 @@
 
 ## 2026-07-03
 
+- [shared] add - card layout modes (information, confirm, triage) for informational vs triage cards
+- [shared] add - gauge reference tables on standard FAQ cards
+- [dennysville] add - propane tank gauge card with gallon estimate table
+- [dennysville] edit - oil gauge card with 275-gallon reference table and cardMode on local cards
+- [all] edit - bump release version to v1.0.5
 - [dennysville] add - eight General and Delivery local cards for branch operations
 - [all] edit - bump release version to v1.0.4
 - [shared] fix - area card zone colors using stable CSS classes
