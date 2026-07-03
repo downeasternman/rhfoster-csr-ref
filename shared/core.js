@@ -287,38 +287,74 @@
   }
 
   function renderAreaCardBody(card) {
-    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-    const rows = (card.scheduleTable || []).map(row => {
-      const dayCells = days.map(day => {
-        const hasDay = Array.isArray(row.days) && row.days.includes(day);
-        return hasDay ? '<td class="area-card-check">Y</td>' : '<td></td>';
-      }).join('');
-      return `
+    const fuelCell = daysArr => (Array.isArray(daysArr) && daysArr.length)
+      ? escapeHtml(daysArr.join(', '))
+      : 'TBD';
+
+    const rows = (card.scheduleTable || []).map(row => `
         <tr>
-          <td>${escapeHtml(row.town)}</td>
-          ${dayCells}
-          <td>${escapeHtml(row.notes || '')}</td>
+          <td>${escapeHtml(row.zone || '')}</td>
+          <td>${escapeHtml(row.towns || '')}</td>
+          <td>${fuelCell(row.offroadDays)}</td>
+          <td>${fuelCell(row.heatingDays)}</td>
+          <td>${fuelCell(row.propaneDays)}</td>
         </tr>
-      `;
-    }).join('');
+      `).join('');
+
+    const branch = getActiveBranch();
+    const mapHeadingText = card.mapHeading
+      || (branch ? `${branch.name} Delivery Map` : card.title);
+
+    const questionsSection = (card.questions && card.questions.length)
+      ? `
+        <div class="area-card-instructions">
+          <div class="area-card-section-label">Confirm with customer</div>
+          <ul class="area-card-questions">${card.questions.map(q => `<li>${escapeHtml(q)}</li>`).join('')}</ul>
+        </div>
+      `
+      : '';
+
+    const workflowSection = (card.workflowSteps && card.workflowSteps.length)
+      ? `
+        <div class="area-card-instructions">
+          <div class="area-card-section-label">What to do next</div>
+          <div class="area-card-workflow">
+            ${card.workflowSteps.map(step => `
+              <div class="area-card-workflow-step${step.type === 'emergency' ? ' emergency' : ''}">
+                <div class="area-card-workflow-label">${escapeHtml(step.label || '')}</div>
+                <p class="area-card-workflow-body">${escapeHtml(step.body || '')}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `
+      : '';
+
     const priorityHtml = card.priorityNote
       ? `<p class="area-card-priority">${escapeHtml(card.priorityNote)}</p>`
       : '';
 
     return `
-      <p class="area-card-summary">${escapeHtml(card.coverageSummary || '')}</p>
-      <img class="area-card-map" src="${MAP_PATH_PREFIX}${escapeHtml(card.mapImage || '')}" alt="${escapeHtml(card.title)} coverage map" onerror="this.style.display='none'">
-      <table class="area-card-table">
-        <thead>
-          <tr>
-            <th>Town / Area</th>
-            <th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th>
-            <th>Notes</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
-      ${priorityHtml}
+      <div class="area-card-body">
+        <p class="area-card-summary">${escapeHtml(card.coverageSummary || '')}</p>
+        <h4 class="area-card-map-heading">${escapeHtml(mapHeadingText)}</h4>
+        <img class="area-card-map" src="${MAP_PATH_PREFIX}${escapeHtml(card.mapImage || '')}" alt="${escapeHtml(card.title)} coverage map" onerror="this.style.display='none'">
+        <table class="area-card-table">
+          <thead>
+            <tr>
+              <th>Zone</th>
+              <th>Towns</th>
+              <th>Offroad</th>
+              <th>#2 &amp; Kero</th>
+              <th>Propane</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        ${questionsSection}
+        ${workflowSection}
+        ${priorityHtml}
+      </div>
     `;
   }
 
@@ -334,7 +370,7 @@
     if (existing) existing.remove();
     if (!activeBranchId || !shouldShowAreaQuickAccess()) return;
 
-    const areaCard = (window.FAQ_DELIVERY || []).find(card =>
+    const areaCard = FAQ_ALL.find(card =>
       card.cardType === 'area' && card.branchId === activeBranchId
     );
     if (!areaCard) return;
