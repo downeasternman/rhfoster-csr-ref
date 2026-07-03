@@ -405,12 +405,33 @@
       : 'TBD';
 
     const zoneCell = row => {
-      const zoneMatch = (row.zone || '').match(/(\d+)/);
-      const zoneClass = zoneMatch ? ` area-card-zone-${zoneMatch[1]}` : '';
+      const zoneClass = row.zoneClass
+        ? ` area-card-zone-${row.zoneClass}`
+        : (() => {
+          const zoneMatch = (row.zone || '').match(/(\d+)/);
+          return zoneMatch ? ` area-card-zone-${zoneMatch[1]}` : '';
+        })();
       return `<td class="area-card-zone${zoneClass}">${escapeHtml(row.zone || '')}</td>`;
     };
 
-    const rows = (card.scheduleTable || []).map(row => `
+    const routedCell = branchKey => {
+      const routedBranch = BRANCHES[branchKey];
+      const branchName = routedBranch ? routedBranch.name : branchKey;
+      const message = `Delivery for this area is handled by ${branchName}. Use the branch selector to open the ${branchName} CSR Reference page for delivery schedule and workflow.`;
+      return `<td colspan="3" class="area-card-routed">${escapeHtml(message)}</td>`;
+    };
+
+    const rows = (card.scheduleTable || []).map(row => {
+      if (row.routedToBranch) {
+        return `
+        <tr>
+          ${zoneCell(row)}
+          <td>${escapeHtml(row.towns || '')}</td>
+          ${routedCell(row.routedToBranch)}
+        </tr>
+      `;
+      }
+      return `
         <tr>
           ${zoneCell(row)}
           <td>${escapeHtml(row.towns || '')}</td>
@@ -418,7 +439,8 @@
           <td>${fuelCell(row.heatingDays)}</td>
           <td>${fuelCell(row.propaneDays)}</td>
         </tr>
-      `).join('');
+      `;
+    }).join('');
 
     const branch = getActiveBranch();
     const mapHeadingText = card.mapHeading

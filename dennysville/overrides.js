@@ -15,8 +15,8 @@ window.BRANCH_LOCAL_CARDS  = [
     desc: "Delivery zones and cold season schedules for the Dennysville area.",
     urgency: null,
     urgencyLabel: null,
-    mapImage: "Eastern_Washington_County_Zones.svg",
-    coverageSummary: "Delivery zones and cold season schedules for the Dennysville area. Note: Any town not listed is not covered.",
+    mapImage: "Eastern_Washington_County_Zones_Final.svg",
+    coverageSummary: "This map shows Dennysville delivery zones 1 through 4 and purple areas served by Machias. Zones 1 through 4 are listed in the table with Dennysville schedules. Purple areas on the map are Machias delivery territory. Any town not listed is not covered by Dennysville delivery.",
     questions: [
       "Confirm Customer Name",
       "Confirm Physical Address",
@@ -27,7 +27,8 @@ window.BRANCH_LOCAL_CARDS  = [
       { zone: "Zone 1", zoneColor: "#1f77b4", towns: "Whiting, Trescott Twp, Lubec", offroadDays: [], heatingDays: [], propaneDays: [] },
       { zone: "Zone 2", zoneColor: "#2ca02c", towns: "Edmunds Twp, Dennysville, Pembroke, Marion Twp", offroadDays: [], heatingDays: [], propaneDays: [] },
       { zone: "Zone 3", zoneColor: "#ff7f0e", towns: "Perry, Pleasant Point, Eastport", offroadDays: [], heatingDays: [], propaneDays: [] },
-      { zone: "Zone 4", zoneColor: "#d62728", towns: "Robbinston, Calais, Baring Plt, Meddybemps, Cooper, Alexander, Princeton, Baileyville, Cathance Twp, Charlotte", offroadDays: [], heatingDays: [], propaneDays: [] }
+      { zone: "Zone 4", zoneColor: "#d62728", towns: "Robbinston, Calais, Baring Plt, Meddybemps, Cooper, Alexander, Princeton, Baileyville, Cathance Twp, Charlotte", offroadDays: [], heatingDays: [], propaneDays: [] },
+      { zone: "Machias territory", zoneClass: "machias", towns: "See purple areas on map (Machias delivery territory)", routedToBranch: "machias" }
     ],
     workflowSteps: [
       {
@@ -46,7 +47,7 @@ window.BRANCH_LOCAL_CARDS  = [
         body: "Create a delivery ticket in Ignite with address and fuel type confirmed. Call delivery dispatch immediately, then send a follow-up email with the ticket details. Do not promise a delivery time until dispatch confirms."
       }
     ],
-    priorityNote: "",
+    priorityNote: "Workflow steps below apply to Dennysville zones 1 through 4 only. If the customer is in a purple (Machias) area, switch to the Machias CSR Reference page before scheduling delivery.",
     script: ""
   },
   {
@@ -222,7 +223,7 @@ window.BRANCH_LOCAL_CARDS  = [
       "Payment method on file or COD?",
       "Is the tank above 10 percent or critically low?"
     ],
-    script: "I'll look up your town on our Delivery Area and Schedule card to make sure we serve your address. I'll create a delivery ticket in Ignite with your fuel type and quantity. If you need delivery by a specific date or have an access issue, I'll flag that for dispatch. If you're out of fuel or have no heat, I'll follow the emergency steps on the delivery area card.",
+    script: "I'll look up your town on our Delivery Area and Schedule card to make sure we serve your address. I'll create a delivery ticket in Ignite with your fuel type and quantity. If you need delivery by a specific date or have an access issue, I'll flag that for dispatch. If you're out of fuel or have no heat, I'll follow the emergency steps on the delivery area card. If their town is in a purple Machias area on the delivery map, switch to the Machias CSR Reference page instead of creating a Dennysville delivery ticket.",
     tags: ["will-call", "schedule", "delivery", "oil", "propane"]
   }
 ];

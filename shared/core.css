@@ -1134,6 +1134,16 @@
   color: #ffffff;
   font-weight: 700;
 }
+.area-card-zone-machias {
+  background-color: #d7bde2;
+  color: var(--ink);
+  font-weight: 700;
+}
+.area-card-routed {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
 .area-card-table tr:nth-child(even) td:not(.area-card-zone) { background: var(--bg); }
 .area-card-check {
   color: var(--red);

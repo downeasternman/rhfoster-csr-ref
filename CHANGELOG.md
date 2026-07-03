@@ -2,6 +2,10 @@
 
 ## 2026-07-03
 
+- [dennysville] edit - delivery area map and Machias territory routing in zone table
+- [shared] add - area card routed-branch row rendering and Machias zone styling
+- [shared] remove - obsolete Eastern Washington County zone map files
+- [all] edit - bump release version to v1.0.6
 - [shared] add - card layout modes (information, confirm, triage) for informational vs triage cards
 - [shared] add - gauge reference tables on standard FAQ cards
 - [dennysville] add - propane tank gauge card with gallon estimate table
