@@ -2,6 +2,10 @@
 
 ## 2026-07-03
 
+- [shared] fix - area card zone colors using stable CSS classes
+- [shared] fix - mobile map and schedule table scroll wrappers
+- [shared] fix - recalculate accordion height after map loads
+- [all] edit - cache-bust shared assets and bump release version to v1.0.3
 - [dennysville] add - delivery area card zone colors matching map
 - [shared] add - area card zone column color rendering
 - [all] edit - bump release version to v1.0.2

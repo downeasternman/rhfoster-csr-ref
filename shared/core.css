@@ -899,12 +899,27 @@
   flex-direction: column;
   gap: 16px;
 }
-.area-card-map {
-  width: 100%;
+.area-card-map-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
   max-width: 100%;
-  display: block;
-  border-radius: var(--radius);
   border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+.area-card-map {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+}
+.area-card-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+.faq-item.open:has(.area-card-body) .faq-body {
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .area-card-summary {
   font-size: 14px;
@@ -978,6 +993,7 @@
 }
 .area-card-table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
   font-size: 13px;
 }
@@ -998,22 +1014,32 @@
   vertical-align: middle;
 }
 .area-card-zone {
-  font-weight: 700;
-  color: #ffffff;
+  font-weight: 600;
   text-align: center;
   white-space: nowrap;
-  background-color: var(--zone-bg, transparent);
-  box-shadow: inset 3px 0 0 rgba(0, 0, 0, 0.15);
-}
-.area-card-zone:not([style*="--zone-bg"]) {
   color: var(--ink);
-  font-weight: 600;
-  box-shadow: none;
 }
-.area-card-table tr:nth-child(even) td { background: var(--bg); }
-.area-card-table tr:nth-child(even) .area-card-zone {
-  background-color: var(--zone-bg, var(--bg));
+.area-card-zone-1 {
+  background-color: #1f77b4;
+  color: #ffffff;
+  font-weight: 700;
 }
+.area-card-zone-2 {
+  background-color: #2ca02c;
+  color: #ffffff;
+  font-weight: 700;
+}
+.area-card-zone-3 {
+  background-color: #ff7f0e;
+  color: #ffffff;
+  font-weight: 700;
+}
+.area-card-zone-4 {
+  background-color: #d62728;
+  color: #ffffff;
+  font-weight: 700;
+}
+.area-card-table tr:nth-child(even) td:not(.area-card-zone) { background: var(--bg); }
 .area-card-check {
   color: var(--red);
   font-weight: 700;
@@ -1207,6 +1233,10 @@
   .faq-body-inner {
     padding-left: 14px;
     padding-right: 14px;
+  }
+
+  .area-card-table {
+    font-size: 12px;
   }
 
   .site-footer {

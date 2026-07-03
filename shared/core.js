@@ -292,10 +292,9 @@
       : 'TBD';
 
     const zoneCell = row => {
-      const zoneStyle = row.zoneColor
-        ? ` style="--zone-bg: ${escapeHtml(row.zoneColor)}"`
-        : '';
-      return `<td class="area-card-zone"${zoneStyle}>${escapeHtml(row.zone || '')}</td>`;
+      const zoneMatch = (row.zone || '').match(/(\d+)/);
+      const zoneClass = zoneMatch ? ` area-card-zone-${zoneMatch[1]}` : '';
+      return `<td class="area-card-zone${zoneClass}">${escapeHtml(row.zone || '')}</td>`;
     };
 
     const rows = (card.scheduleTable || []).map(row => `
@@ -345,7 +344,10 @@
       <div class="area-card-body">
         <p class="area-card-summary">${escapeHtml(card.coverageSummary || '')}</p>
         <h4 class="area-card-map-heading">${escapeHtml(mapHeadingText)}</h4>
-        <img class="area-card-map" src="${MAP_PATH_PREFIX}${escapeHtml(card.mapImage || '')}" alt="${escapeHtml(card.title)} coverage map" onerror="this.style.display='none'">
+        <div class="area-card-map-wrap">
+          <img class="area-card-map" src="${MAP_PATH_PREFIX}${escapeHtml(card.mapImage || '')}" alt="${escapeHtml(card.title)} coverage map" onerror="this.style.display='none'">
+        </div>
+        <div class="area-card-table-wrap">
         <table class="area-card-table">
           <thead>
             <tr>
@@ -358,11 +360,22 @@
           </thead>
           <tbody>${rows}</tbody>
         </table>
+        </div>
         ${questionsSection}
         ${workflowSection}
         ${priorityHtml}
       </div>
     `;
+  }
+
+  function bindAreaCardMapLoad(cardEl) {
+    const mapImg = cardEl.querySelector('.area-card-map');
+    if (!mapImg) return;
+    const onMapReady = () => {
+      if (cardEl.classList.contains('open')) recalcOpenAccordion();
+    };
+    if (mapImg.complete) onMapReady();
+    else mapImg.addEventListener('load', onMapReady);
   }
 
   function shouldShowAreaQuickAccess() {
@@ -704,6 +717,8 @@
       }
       updatePrintButtonStates();
     });
+
+    if (item.cardType === 'area') bindAreaCardMapLoad(el);
 
     cardElements.set(item.id, el);
   });
