@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-07-04
+
+- [shared] add - URL search query parameter deep linking support
+- [shared] add - dynamic category pills that hide when search yields no matches
+- [shared] add - link from Dennysville Machias zone row to Machias delivery reference
+- [shared] fix - delivery area map card always sorted first within Delivery sections
+- [shared] refactor - move generic delivery cards from Dennysville overrides into shared delivery data
+- [shared] remove - retired delivery-placeholder card now that shared delivery content exists
+- [all] edit - bump release version to v1.0.7
+
 ## 2026-07-03
 
 - [dennysville] edit - delivery area map and Machias territory routing in zone table

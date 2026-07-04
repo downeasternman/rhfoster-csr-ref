@@ -414,11 +414,15 @@
       return `<td class="area-card-zone${zoneClass}">${escapeHtml(row.zone || '')}</td>`;
     };
 
-    const routedCell = branchKey => {
-      const routedBranch = BRANCHES[branchKey];
-      const branchName = routedBranch ? routedBranch.name : branchKey;
-      const message = `Delivery for this area is handled by ${branchName}. Use the branch selector to open the ${branchName} CSR Reference page for delivery schedule and workflow.`;
-      return `<td colspan="3" class="area-card-routed">${escapeHtml(message)}</td>`;
+    const routedCell = row => {
+      const routedBranch = BRANCHES[row.routedToBranch];
+      const branchName = routedBranch ? routedBranch.name : row.routedToBranch;
+      const branchUrl = getBranchUrl(row.routedToBranch);
+      const searchTerm = row.routedSearchTerm || 'delivery';
+      const linkHref = `../${branchUrl}/index.html?search=${encodeURIComponent(searchTerm)}`;
+      const message = `Delivery for this area is handled by ${branchName}. `;
+      const linkHtml = `<a class="area-card-routed-link" href="${escapeHtml(linkHref)}">Open ${escapeHtml(branchName)} CSR Reference, Delivery</a>`;
+      return `<td colspan="3" class="area-card-routed">${escapeHtml(message)}${linkHtml}</td>`;
     };
 
     const rows = (card.scheduleTable || []).map(row => {
@@ -427,7 +431,7 @@
         <tr>
           ${zoneCell(row)}
           <td>${escapeHtml(row.towns || '')}</td>
-          ${routedCell(row.routedToBranch)}
+          ${routedCell(row)}
         </tr>
       `;
       }
@@ -725,10 +729,15 @@
 
   function buildCategoryPills() {
     if (!pillsEl) return;
+    const q = searchQuery.trim();
     const categorySourceBase = activeDept === 'all'
       ? FAQ_ALL
       : FAQ_ALL.filter(item => item.department === activeDept);
-    const categorySource = categorySourceBase.filter(isRenderableCard);
+    const categorySource = categorySourceBase.filter(item => {
+      if (!isRenderableCard(item)) return false;
+      if (q && !cardMatchesSearch(item, q)) return false;
+      return true;
+    });
     const categories = ['All', ...new Set(categorySource.map(item => item.category).sort())];
 
     if (!categories.includes(activeCategory)) {
@@ -864,6 +873,16 @@
     return true;
   }
 
+  function sortAreaCardsFirst(cards) {
+    const areaCards = [];
+    const otherCards = [];
+    cards.forEach(item => {
+      if (item.cardType === 'area') areaCards.push(item);
+      else otherCards.push(item);
+    });
+    return areaCards.concat(otherCards);
+  }
+
   function showEmpty(visible) {
     if (!emptyEl) return;
     emptyEl.textContent = 'No matching entries found.';
@@ -896,18 +915,20 @@
       visible = visibleCards.length;
     } else if (activeDept === 'all' && hasSearch) {
       DEPT_ORDER.forEach(dept => {
-        const deptCards = visibleCards.filter(item => item.department === dept);
+        const deptCards = sortAreaCardsFirst(visibleCards.filter(item => item.department === dept));
         if (!deptCards.length) return;
         listEl.appendChild(createDeptHeading(dept));
         appendCards(deptCards);
         visible += deptCards.length;
       });
     } else if (!hasSearch) {
-      appendCards(visibleCards);
-      visible = visibleCards.length;
+      const deptCards = sortAreaCardsFirst(visibleCards);
+      appendCards(deptCards);
+      visible = deptCards.length;
     } else {
-      appendCards(visibleCards);
-      visible = visibleCards.length;
+      const deptCards = sortAreaCardsFirst(visibleCards);
+      appendCards(deptCards);
+      visible = deptCards.length;
 
       const crossDeptCards = FAQ_ALL.filter(item => {
         if (!isRenderableCard(item)) return false;
@@ -1098,6 +1119,7 @@
   searchEl.addEventListener('input', () => {
     searchQuery = searchEl.value;
     clearBtn.style.display = searchQuery ? 'flex' : 'none';
+    buildCategoryPills();
     applyFilters();
   });
 
@@ -1106,6 +1128,7 @@
     searchQuery = '';
     clearBtn.style.display = 'none';
     searchEl.focus();
+    buildCategoryPills();
     applyFilters();
   });
 
@@ -1137,6 +1160,15 @@
   initBranchContextStrip();
   initBranchSelector();
   initDeptTabs();
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlSearchTerm = urlParams.get('search');
+  if (urlSearchTerm) {
+    searchQuery = urlSearchTerm;
+    searchEl.value = urlSearchTerm;
+    clearBtn.style.display = 'flex';
+  }
+
   buildCategoryPills();
   applyFilters();
 

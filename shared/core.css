@@ -1144,6 +1144,11 @@
   color: var(--ink-2);
   line-height: 1.5;
 }
+.area-card-routed-link {
+  color: var(--red);
+  font-weight: 700;
+  text-decoration: underline;
+}
 .area-card-table tr:nth-child(even) td:not(.area-card-zone) { background: var(--bg); }
 .area-card-check {
   color: var(--red);
