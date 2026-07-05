@@ -75,11 +75,15 @@ Branch-specific routing, contacts, local cards, and suppressions live in each br
 
 ## Updating Delivery Schedule Data
 
-Delivery area and schedule cards are branch-specific local cards. Add or update the area card in the branch `overrides.js` file using the delivery area card structure from `.cursorrules`. Keep `branchId` matched to the branch key and keep the map filename matched to the PNG in `shared/maps/`.
+Delivery area and schedule cards are branch-specific local cards. Add or update the area card in the branch `overrides.js` file using the delivery area card structure from `.cursorrules`. Keep `branchId` matched to the branch key and keep the map filename matched to the image file in `shared/maps/`.
 
 ## Updating Area Maps
 
-Area maps are PNG files in `shared/maps/`. Replace the PNG with the same filename when updating a map. If the filename changes, update the matching `mapImage` value in the branch area card.
+Area maps are static image files in `shared/maps/`. Replace the image with the same filename when updating a map. If the filename changes, update the matching `mapImage` value in the branch area card.
+
+To maintain accurate geographic boundaries, correct relative sizes, and jagged coastlines, delivery maps are generated programmatically using Python, Geopandas, and official state GIS shapefiles. Do not hand-draw or manually colorize flat images.
+
+For instructions on regenerating existing maps or creating new territory maps for other branches, see the [Map Generation Guide](MAPGENERATION.md).
 
 ## Branch Manager Change Requests
 
