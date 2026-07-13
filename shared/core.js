@@ -32,6 +32,72 @@
     ...(window.FAQ_GENERAL || []),
     ...localCards,
   ].filter(card => !suppress.includes(card.id));
+
+  // O(1) card lookup by id - used in applyFilters render loop
+  const cardMap = new Map();
+  FAQ_ALL.forEach(card => cardMap.set(card.id, card));
+
+  // Fuse instance - built once, reused on every search
+  let fuse = null;
+  try {
+    if (typeof Fuse !== 'undefined') {
+      fuse = new Fuse(FAQ_ALL, {
+        includeScore: true,
+        threshold: 0.42,
+        distance: 100,
+        minMatchCharLength: 2,
+        ignoreLocation: true,
+        useExtendedSearch: false,
+        keys: [
+          { name: 'title',     weight: 0.45 },
+          { name: 'tags',      weight: 0.25 },
+          { name: 'questions', weight: 0.15 },
+          { name: 'desc',      weight: 0.10 },
+          { name: 'category',  weight: 0.03 },
+          { name: 'script',    weight: 0.02 },
+        ],
+      });
+    } else {
+      console.warn('RHF: Fuse.js not loaded - substring search active');
+    }
+  } catch (e) {
+    console.warn('RHF: Fuse.js init failed:', e);
+    fuse = null;
+  }
+
+  // Populated on each search pass, null when no search is active
+  let fuseMatchIds = null;
+  let searchSuggestion = null;
+
+  const searchVocabSet = new Set();
+  FAQ_ALL.forEach(card => {
+    [card.title, card.desc, card.category].forEach(field => {
+      normalizeSearchText(field || '').split(' ').filter(w => w.length > 2)
+        .forEach(w => searchVocabSet.add(w));
+    });
+    (card.tags || []).forEach(tag => {
+      normalizeSearchText(tag).split(' ').filter(w => w.length > 2)
+        .forEach(w => searchVocabSet.add(w));
+    });
+  });
+  const searchVocab = [...searchVocabSet];
+
+  let vocabFuse = null;
+  try {
+    if (typeof Fuse !== 'undefined' && searchVocab.length) {
+      vocabFuse = new Fuse(searchVocab.map(word => ({ word })), {
+        keys: ['word'],
+        includeScore: true,
+        threshold: 0.4,
+        minMatchCharLength: 2,
+        ignoreLocation: true,
+      });
+    }
+  } catch (e) {
+    console.warn('RHF: vocab Fuse init failed:', e);
+    vocabFuse = null;
+  }
+
   const searchEl   = document.getElementById('search');
   const clearBtn   = document.getElementById('searchClear');
   const pillsEl    = document.getElementById('pills');
@@ -193,12 +259,96 @@
     ].join(' '));
   }
 
-  function searchMatches(indexText, query) {
-    if (!query) return true;
-    const q = expandAliases(query);
+  function buildSearchSuggestion(query) {
+    if (!vocabFuse || !query) return null;
+    const tokens = normalizeSearchText(query).split(' ').filter(Boolean);
+    let changed = false;
+    const corrected = tokens.map(token => {
+      if (token.length < 2) return token;
+      if (searchVocab.includes(token)) return token;
+      const hits = vocabFuse.search(token);
+      if (hits.length && hits[0].score <= 0.4) {
+        changed = true;
+        return hits[0].item.word;
+      }
+      return token;
+    });
+    if (!changed) return null;
+    const suggestion = corrected.join(' ');
+    return suggestion === normalizeSearchText(query) ? null : suggestion;
+  }
+
+  function hasExactSearchHit(query) {
+    const q = expandAliases(normalizeSearchText(query));
     if (!q) return true;
-    if (indexText.includes(q)) return true;
-    return q.split(' ').filter(Boolean).every(token => indexText.includes(token));
+    return FAQ_ALL.some(card => {
+      if (!isRenderableCard(card)) return false;
+      const idx = buildSearchIndex(card);
+      return idx.includes(q) || q.split(' ').filter(Boolean).every(t => idx.includes(t));
+    });
+  }
+
+  function searchMatches(card) {
+    if (!searchQuery) return true;
+
+    // Primary path: Fuse has run and populated the ID set
+    if (fuseMatchIds !== null) {
+      return fuseMatchIds.has(card.id);
+    }
+
+    // Fallback path: Fuse unavailable or returned zero results
+    // Uses existing alias-expanded substring matching
+    const q = expandAliases(searchQuery);
+    if (!q) return true;
+    const idx = buildSearchIndex(card);
+    return idx.includes(q) ||
+      q.split(' ').filter(Boolean).every(t => idx.includes(t));
+  }
+
+  function runFuseSearch() {
+    if (!searchQuery) {
+      fuseMatchIds = null;
+      searchSuggestion = null;
+      return;
+    }
+
+    if (!fuse) {
+      fuseMatchIds = null;
+      searchSuggestion = null;
+      return;
+    }
+
+    const expandedQuery = expandAliases(searchQuery);
+
+    // Pass 1: raw query (catches direct fuzzy matches)
+    const rawResults = fuse.search(searchQuery);
+
+    // Pass 2: alias-expanded query (catches furnace -> boiler heating etc.)
+    // Skip if expansion produced no change
+    const expandedResults = (expandedQuery !== searchQuery)
+      ? fuse.search(expandedQuery)
+      : [];
+
+    // Union of both passes, deduplicated by id
+    const seen = new Set();
+    const combined = [];
+    [...rawResults, ...expandedResults].forEach(result => {
+      if (!seen.has(result.item.id)) {
+        seen.add(result.item.id);
+        combined.push(result);
+      }
+    });
+
+    // null signals searchMatches to use substring fallback when Fuse finds nothing
+    fuseMatchIds = combined.length > 0
+      ? new Set(combined.map(r => r.item.id))
+      : null;
+
+    if (fuseMatchIds && !hasExactSearchHit(searchQuery)) {
+      searchSuggestion = buildSearchSuggestion(searchQuery);
+    } else {
+      searchSuggestion = null;
+    }
   }
 
   function recalcOpenAccordion() {
@@ -735,7 +885,7 @@
       : FAQ_ALL.filter(item => item.department === activeDept);
     const categorySource = categorySourceBase.filter(item => {
       if (!isRenderableCard(item)) return false;
-      if (q && !cardMatchesSearch(item, q)) return false;
+      if (q && !cardMatchesSearch(item)) return false;
       return true;
     });
     const categories = ['All', ...new Set(categorySource.map(item => item.category).sort())];
@@ -834,9 +984,8 @@
   });
 
   // ── Filter logic ─────────────────────────────────────────────────────
-  function cardMatchesSearch(item, q) {
-    const el = cardElements.get(item.id);
-    return el ? searchMatches(el.dataset.search, q) : false;
+  function cardMatchesSearch(item) {
+    return searchMatches(item);
   }
 
   function updateCardHighlight(item, q, searchMatch) {
@@ -889,9 +1038,35 @@
     emptyEl.style.display = visible ? 'block' : 'none';
   }
 
+  function updateResultsMeta(visible, q) {
+    if (!metaEl) return;
+    const showFiltered = visible !== FAQ_ALL.length || q || activeCategory !== 'All' || activeDept !== 'all';
+
+    if (!showFiltered) {
+      metaEl.textContent = `${FAQ_ALL.length} topics`;
+      return;
+    }
+
+    if (searchSuggestion && q) {
+      const suffixParts = [`${visible} result${visible !== 1 ? 's' : ''}`];
+      if (activeDept !== 'all') suffixParts.push(DEPT_LABELS[activeDept]);
+      if (activeCategory !== 'All') suffixParts.push(`in ${activeCategory}`);
+      const suffixText = ' · ' + suffixParts.join(' ');
+      metaEl.innerHTML = `0 results for &quot;${escapeHtml(q)}&quot;. Did you mean <button type="button" class="search-suggestion-btn">${escapeHtml(searchSuggestion)}</button>?${escapeHtml(suffixText)}`;
+      return;
+    }
+
+    const parts = [`${visible} result${visible !== 1 ? 's' : ''}`];
+    if (activeDept !== 'all') parts.push(DEPT_LABELS[activeDept]);
+    if (activeCategory !== 'All') parts.push(`in ${activeCategory}`);
+    if (q) parts.push(`for "${q}"`);
+    metaEl.textContent = parts.join(' ');
+  }
+
   function applyFilters() {
     const q = searchQuery.trim();
     const hasSearch = Boolean(q);
+    const highlightQuery = searchSuggestion || searchQuery;
     let visible = 0;
 
     cardElements.forEach(el => {
@@ -905,8 +1080,8 @@
       if (!isRenderableCard(item)) return false;
       const deptMatch = activeDept === 'all' || item.department === activeDept;
       const catMatch = activeCategory === 'All' || item.category === activeCategory;
-      const searchMatch = cardMatchesSearch(item, q);
-      updateCardHighlight(item, q, searchMatch);
+      const searchMatch = cardMatchesSearch(item);
+      updateCardHighlight(item, highlightQuery, searchMatch);
       return deptMatch && catMatch && searchMatch;
     });
 
@@ -933,8 +1108,8 @@
       const crossDeptCards = FAQ_ALL.filter(item => {
         if (!isRenderableCard(item)) return false;
         if (item.department === activeDept) return false;
-        const searchMatch = cardMatchesSearch(item, q);
-        updateCardHighlight(item, q, searchMatch);
+        const searchMatch = cardMatchesSearch(item);
+        updateCardHighlight(item, highlightQuery, searchMatch);
         return searchMatch;
       });
 
@@ -957,16 +1132,7 @@
     });
     recalcOpenAccordion();
 
-    const parts = [];
-    if (visible !== FAQ_ALL.length || q || activeCategory !== 'All' || activeDept !== 'all') {
-      parts.push(`${visible} result${visible !== 1 ? 's' : ''}`);
-      if (activeDept !== 'all') parts.push(DEPT_LABELS[activeDept]);
-      if (activeCategory !== 'All') parts.push(`in ${activeCategory}`);
-      if (q) parts.push(`for "${q}"`);
-      metaEl.textContent = parts.join(' ');
-    } else {
-      metaEl.textContent = `${FAQ_ALL.length} topics`;
-    }
+    updateResultsMeta(visible, q);
 
     showEmpty(visible === 0);
     updatePrintButtonStates();
@@ -1116,16 +1282,33 @@
   }
 
   // ── Search input ─────────────────────────────────────────────────────
+  let searchTimeout;
+
   searchEl.addEventListener('input', () => {
-    searchQuery = searchEl.value;
+    clearTimeout(searchTimeout);
+    searchQuery = searchEl.value.trim();
     clearBtn.style.display = searchQuery ? 'flex' : 'none';
-    buildCategoryPills();
-    applyFilters();
+
+    if (!searchQuery) {
+      fuseMatchIds = null;
+      searchSuggestion = null;
+      buildCategoryPills();
+      applyFilters();
+      return;
+    }
+
+    searchTimeout = setTimeout(() => {
+      runFuseSearch();
+      buildCategoryPills();
+      applyFilters();
+    }, 75);
   });
 
   clearBtn.addEventListener('click', () => {
     searchEl.value = '';
     searchQuery = '';
+    fuseMatchIds = null;
+    searchSuggestion = null;
     clearBtn.style.display = 'none';
     searchEl.focus();
     buildCategoryPills();
@@ -1137,6 +1320,20 @@
     if (!emailButton) return;
     handleEmailButtonClick(emailButton);
   });
+
+  if (metaEl) {
+    metaEl.addEventListener('click', event => {
+      const btn = event.target.closest('.search-suggestion-btn');
+      if (!btn || !searchSuggestion) return;
+      searchEl.value = searchSuggestion;
+      searchQuery = searchSuggestion;
+      searchSuggestion = null;
+      clearBtn.style.display = 'flex';
+      runFuseSearch();
+      buildCategoryPills();
+      applyFilters();
+    });
+  }
 
   document.addEventListener('click', event => {
     const areaLink = event.target.closest('.area-quick-access');
@@ -1167,6 +1364,7 @@
     searchQuery = urlSearchTerm;
     searchEl.value = urlSearchTerm;
     clearBtn.style.display = 'flex';
+    runFuseSearch();
   }
 
   buildCategoryPills();

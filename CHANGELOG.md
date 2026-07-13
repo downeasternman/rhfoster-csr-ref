@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-07-13
+
+- [shared] add - Fuse.js fuzzy search with alias-expanded dual pass and substring fallback
+- [shared] add - "Did you mean" typo suggestion with corrected-term highlighting on results
+- [shared] add - vendored Fuse 7.0.0 for offline search
+- [all] edit - bump release version to v1.0.8
+
 ## 2026-07-04
 
 - [shared] add - URL search query parameter deep linking support
