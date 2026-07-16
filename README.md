@@ -14,7 +14,9 @@ rhfoster-csr-ref/
 │   ├── data-delivery.js
 │   ├── data-general.js
 │   ├── branches.js
-│   └── maps/
+│   ├── maps/
+│   └── vendor/
+│       └── fuse.min.js
 ├── penobscot/
 │   ├── index.html
 │   └── overrides.js
@@ -37,6 +39,8 @@ rhfoster-csr-ref/
 │   ├── index.html
 │   └── overrides.js
 ├── CHANGELOG.md
+├── MAPGENERATION.md
+├── SEARCH.md
 └── README.md
 ```
 
@@ -45,6 +49,10 @@ rhfoster-csr-ref/
 Service FAQ content lives in `shared/data-service.js`. Delivery FAQ content lives in `shared/data-delivery.js`. General FAQ content lives in `shared/data-general.js`.
 
 To edit an FAQ card, update the appropriate data file, review the changed card in a browser, commit the change, and push it to GitHub. Do not put logic in data files. Do not move cards between data files unless the department is changing and the related branch behavior has been reviewed.
+
+## Search
+
+Branch pages use Fuse.js fuzzy search with aliases, typo suggestions, department filters, and `?search=` deep links. For how search works and how to improve results when editing content, see the [Search Guide](SEARCH.md).
 
 ## Adding a New FAQ Entry
 
